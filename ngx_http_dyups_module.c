@@ -1514,9 +1514,12 @@ ngx_dyups_init_upstream(ngx_http_dyups_srv_conf_t *duscf, ngx_str_t *name,
     duscf->dynamic = 1;
     duscf->upstream = uscf;
 
+    ngx_memzero(&cf, sizeof(ngx_conf_t));
+
     cf.module_type = NGX_HTTP_MODULE;
     cf.cmd_type = NGX_HTTP_MAIN_CONF;
     cf.pool = duscf->pool;
+    cf.temp_pool = duscf->pool;
 
     ctx = ngx_pcalloc(duscf->pool, sizeof(ngx_http_conf_ctx_t));
     if (ctx == NULL) {
@@ -1581,6 +1584,9 @@ ngx_dyups_delete_upstream(ngx_http_dyups_srv_conf_t *duscf)
     uscf = duscf->upstream;
     umcf = ngx_http_cycle_get_module_main_conf(ngx_cycle,
                                                ngx_http_upstream_module);
+    if (umcf == NULL) {
+      return;
+    }
     uscfp = umcf->upstreams.elts;
 
     ngx_log_error(NGX_LOG_INFO, ngx_cycle->log, 0,
